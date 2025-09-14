@@ -48,7 +48,7 @@ const handleExportPDF = async () => {
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 15;
 
-  // ✅ إضافة خط عربي
+
   doc.addFileToVFS("Amiri-Regular.ttf", fontAmiri);
   doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
 
@@ -69,7 +69,7 @@ const handleExportPDF = async () => {
     });
   };
 
-  // دالة لتحديد الخط حسب النص
+
   const isArabic = (text) => /[\u0600-\u06FF]/.test(text);
   const drawText = (text, x, y, options = {}) => {
     if (!text) return;
@@ -82,7 +82,7 @@ const handleExportPDF = async () => {
     doc.setFont("Amiri", "normal");
     doc.setFontSize(28);
     drawText(pageLang === 'ar' ? "فاتورة" : "INVOICE", pageWidth - margin, 25, { align: "right" });
-    if (logoImg) doc.addImage(logoImg, "JPEG", margin, 10, 40, 20);
+    if (logoImg) doc.addImage(logoImg, "JPEG", margin, 10, 40, 30);
   };
 
   // 🟢 الفوتر
@@ -161,7 +161,7 @@ const handleExportPDF = async () => {
   let finalY = doc.lastAutoTable.finalY + 10;
   const footerHeight = 60;
   const headerHeight = 50; // ارتفاع الهيدر
-  const startYNewPage = headerHeight + 10; // مسافة بين الهيدر والجدول في الصفحة الجديدة
+  const startYNewPage = headerHeight + 10; 
 
   if (finalY + 30 > pageHeight - footerHeight) {
     doc.addPage();

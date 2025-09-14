@@ -47,7 +47,8 @@ User.hasMany(Invoice, { foreignKey: 'userId' });
 Invoice.hasMany(Item, { foreignKey: 'invoiceId', onDelete: 'CASCADE' });
 Item.belongsTo(Invoice, { foreignKey: 'invoiceId' });
 
-sequelize.sync({ force: true });
+sequelize.sync();
+
 
 
 // 🛡️ التحقق من التوكن

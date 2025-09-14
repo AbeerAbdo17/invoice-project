@@ -256,19 +256,30 @@ function InvoiceList() {
       )}
 
       <button
-        style={{
-          position: 'fixed', bottom: '20px', left: '20px', padding: '12px 18px',
-          fontSize: '16px', borderRadius: '50px', backgroundColor: '#28a745', color: 'white',
-          border: 'none', boxShadow: '0 4px 10px rgba(0,0,0,0.2)', cursor: 'pointer', zIndex: 1000,
-          transition: '0.3s',
-          transform: hoveredBtn === 'newInvoice' ? 'scale(1.05)' : 'scale(1)',
-        }}
-        onMouseEnter={() => setHoveredBtn('newInvoice')}
-        onMouseLeave={() => setHoveredBtn(null)}
-        onClick={() => navigate('/Invoice')}
-      >
-        {t('invoiceList.newInvoice')}
-      </button>
+  style={{
+    position: 'fixed',
+    bottom: '20px',
+    left: isRTL ? '20px' : 'auto',
+    right: !isRTL ? '20px' : 'auto',
+    padding: '12px 18px',
+    fontSize: '16px',
+    borderRadius: '50px',
+    backgroundColor: '#28a745',
+    color: 'white',
+    border: 'none',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+    cursor: 'pointer',
+    zIndex: 1000,
+    transition: '0.3s',
+    transform: hoveredBtn === 'newInvoice' ? 'scale(1.05)' : 'scale(1)',
+  }}
+  onMouseEnter={() => setHoveredBtn('newInvoice')}
+  onMouseLeave={() => setHoveredBtn(null)}
+  onClick={() => navigate('/Invoice')}
+>
+  {t('invoiceList.newInvoice')}
+</button>
+
     </div>
   );
 }

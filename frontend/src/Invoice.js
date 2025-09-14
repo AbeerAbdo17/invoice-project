@@ -78,26 +78,32 @@ function Invoice() {
     }
   };
 
-  const handleSaveToDatabase = () => {
-    const token = localStorage.getItem('token');
-    fetch('http://100.70.131.12:5000/api/invoices', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ invoiceNumber, clientName, date, items })
+const handleSaveToDatabase = () => {
+  const token = localStorage.getItem('token');
+  fetch('http://100.70.131.12:5000/api/invoices', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      invoiceNumber,
+      clientName,
+      date: new Date().toISOString(),  // ✅ خزن بصيغة ISO
+      items
     })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          alert(t("saveSuccess"));
-          navigate('/invoices');
-        } else {
-          alert(t("saveFail") + ": " + data.message);
-        }
-      });
-  };
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert(t("saveSuccess"));
+        navigate('/invoices');
+      } else {
+        alert(t("saveFail") + ": " + data.message);
+      }
+    });
+};
+
 
   const handleNewInvoice = () => {
     const token = localStorage.getItem('token');
