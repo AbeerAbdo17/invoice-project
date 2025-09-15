@@ -84,14 +84,17 @@ function InvoiceList() {
       });
     };
 
-    const drawText = (text, x, y, options = {}) => {
-      doc.setFont(/[\u0600-\u06FF]/.test(text) ? 'Amiri' : 'helvetica', 'normal');
-      doc.text(text, x, y, options);
-    };
+const drawText = (text, x, y, options = {}) => {
+  doc.setFont(/[\u0600-\u06FF]/.test(text) ? 'Amiri' : 'helvetica', 'normal');
+  doc.text(text, x, y, options);
+};
+
+
 
     const drawHeader = () => {
       doc.setFont('Amiri', 'normal');
       doc.setFontSize(28);
+      doc.setFont(undefined, 'bold')
       drawText(i18n.language === 'ar' ? 'فاتورة' : 'INVOICE', pageWidth - margin, 25, { align: 'right' });
       const logoImg = `${window.location.origin}/images/logo.jpg`;
       if (logoImg) doc.addImage(logoImg, 'JPEG', margin, 10, 40, 20);
@@ -109,7 +112,7 @@ function InvoiceList() {
       drawText('+249911451467', pageWidth - margin, footerY + 6, { align: 'right' });
       drawText('support@kian24.com', pageWidth - margin, footerY + 12, { align: 'right' });
       drawText('www.kian24.com', pageWidth - margin, footerY + 18, { align: 'right' });
-      drawText(i18n.language === 'ar' ? 'بورتسودان | حي الأغاريق | الشركة السودانية' : 'Port Sudan | Al-Aghariq District | South Sudan Company', pageWidth - margin, footerY + 24, { align: 'right' });
+      drawText(i18n.language === 'ar' ? 'بورتسودان | حي الأغاريق | جنوب شركة سوداني ' : 'Port Sudan | Al-Aghariq District | South Sudani Company', pageWidth - margin, footerY + 24, { align: 'right' });
 
       doc.setFontSize(14);
       drawText(i18n.language === 'ar' ? 'شكراً لكم' : 'Thank You', pageWidth / 2, footerY + 40, { align: 'center' });
@@ -117,19 +120,50 @@ function InvoiceList() {
 
     drawHeader();
     doc.setFontSize(12);
-    drawText(`${t('invoiceList.clientName')}: ${clientName}`, margin, 45, { align: 'left' });
-    if (invoice.clientPhone) drawText(`${invoice.clientPhone}`, margin, 51, { align: 'left' });
-    if (invoice.clientAddress) drawText(`${invoice.clientAddress}`, margin, 57, { align: 'left' });
-    drawText(`${t('invoiceList.invoiceNumber')}: ${invoice.invoiceNumber || '---'}`, pageWidth - margin, 45, { align: 'right' });
-    drawText(`${formatDate(invoice.created_at || invoice.date)}`, pageWidth - margin, 51, { align: 'right' });
 
-    const tableColumns = isRTL ? ['الصنف', 'الكمية', 'سعر الوحدة', 'الإجمالي'] : ['Item', 'Quantity', 'Unit Price', 'Total'];
-    const tableRows = invoiceItems.length > 0 ? invoiceItems.map(i => [
-      i.name || i.service || '',
-      i.quantity,
-      `${i.price.toLocaleString()} $`,
-      `${(i.price * i.quantity).toLocaleString()} $`,
-    ]) : [[isRTL ? 'لا يوجد أصناف' : 'No items', '', '', '']];
+if (i18n.language === 'ar') {
+  // عربي → عكس الأماكن
+  drawText(`${invoice.invoiceNumber || '---'} : رقم الفاتورة`, margin, 45, { align: 'left' });
+  drawText(`${formatDate(invoice.created_at || invoice.date)}`, margin, 51, { align: 'left' });
+
+  drawText(`${t('invoiceList.clientName')}: ${clientName}`, pageWidth - margin, 45, { align: 'right' });
+  if (invoice.clientPhone) drawText(`${invoice.clientPhone}`, pageWidth - margin, 51, { align: 'right' });
+  if (invoice.clientAddress) drawText(`${invoice.clientAddress}`, pageWidth - margin, 57, { align: 'right' });
+} else {
+  // إنجليزي → الوضع الطبيعي
+  drawText(`${t('invoiceList.clientName')}: ${clientName}`, margin, 45, { align: 'left' });
+  if (invoice.clientPhone) drawText(`${invoice.clientPhone}`, margin, 51, { align: 'left' });
+  if (invoice.clientAddress) drawText(`${invoice.clientAddress}`, margin, 57, { align: 'left' });
+
+  drawText(`Invoice No.: ${invoice.invoiceNumber || '---'}`, pageWidth - margin, 45, { align: 'right' });
+  drawText(`${formatDate(invoice.created_at || invoice.date)}`, pageWidth - margin, 51, { align: 'right' });
+}
+
+
+    
+  const tableColumns = i18n.language === 'ar' 
+  ? ["الإجمالي", "سعر الوحدة", "الكمية", "الصنف"]   // نعكس الأعمدة
+  : ["Item", "Quantity", "Unit Price", "Total"];
+
+const tableRows =
+  invoiceItems.length > 0
+    ? invoiceItems.map((i) =>
+        i18n.language === 'ar'
+          ? [
+              `${(i.price * i.quantity).toLocaleString()} $`,
+              `${i.price.toLocaleString()} $`,
+              i.quantity,
+              i.name || i.service || "",
+            ]
+          : [
+              i.name || i.service || "",
+              i.quantity,
+              `${i.price.toLocaleString()} $`,
+              `${(i.price * i.quantity).toLocaleString()} $`,
+            ]
+      )
+    : [[i18n.language === 'ar' ? "لا يوجد أصناف" : "No items", "", "", ""]];
+
 
     doc.autoTable({
       startY: 70,
@@ -147,18 +181,28 @@ function InvoiceList() {
     });
 
     const finalY = doc.lastAutoTable.finalY + 10;
-    doc.autoTable({
-      startY: finalY,
-      theme: 'grid',
-      body: [
-        [isRTL ? 'الإجمالي الفرعي' : 'Subtotal', `${totalAmount.toLocaleString()} $`],
-        [isRTL ? 'الضريبة (0%)' : 'Tax (0%)', '0 $'],
-        [isRTL ? 'الإجمالي' : 'Total', `${totalAmount.toLocaleString()} $`],
+doc.autoTable({
+  startY: finalY,
+  theme: 'grid',
+  body: i18n.language === 'ar'
+    ? [
+        [`${totalAmount.toLocaleString()} $`, 'الإجمالي الفرعي'],
+        ['0 $', 'الضريبة (0%)'],
+        [`${totalAmount.toLocaleString()} $`, 'الإجمالي'],
+      ]
+    : [
+        ['Subtotal', `${totalAmount.toLocaleString()} $`],
+        ['Tax (0%)', '0 $'],
+        ['Total', `${totalAmount.toLocaleString()} $`],
       ],
-      columnStyles: { 0: { halign: 'left', cellWidth: 60 }, 1: { halign: 'right', cellWidth: 40, fontStyle: 'bold' } },
-      styles: { fontSize: 12, font: 'Amiri' },
-      margin: { left: pageWidth - 110 },
-    });
+  columnStyles: {
+    0: { halign: i18n.language === 'ar' ? 'right' : 'left', cellWidth: 60 },
+    1: { halign: i18n.language === 'ar' ? 'left' : 'right', cellWidth: 40, fontStyle: 'bold' },
+  },
+  styles: { fontSize: 12, font: 'Amiri' },
+  margin: { left: pageWidth - 110 },
+});
+
 
     doc.save(`Invoice-${invoice.invoiceNumber}.pdf`);
   };
@@ -256,30 +300,19 @@ function InvoiceList() {
       )}
 
       <button
-  style={{
-    position: 'fixed',
-    bottom: '20px',
-    left: isRTL ? '20px' : 'auto',
-    right: !isRTL ? '20px' : 'auto',
-    padding: '12px 18px',
-    fontSize: '16px',
-    borderRadius: '50px',
-    backgroundColor: '#28a745',
-    color: 'white',
-    border: 'none',
-    boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
-    cursor: 'pointer',
-    zIndex: 1000,
-    transition: '0.3s',
-    transform: hoveredBtn === 'newInvoice' ? 'scale(1.05)' : 'scale(1)',
-  }}
-  onMouseEnter={() => setHoveredBtn('newInvoice')}
-  onMouseLeave={() => setHoveredBtn(null)}
-  onClick={() => navigate('/Invoice')}
->
-  {t('invoiceList.newInvoice')}
-</button>
-
+        style={{
+          position: 'fixed', bottom: '20px', left: '20px', padding: '12px 18px',
+          fontSize: '16px', borderRadius: '50px', backgroundColor: '#28a745', color: 'white',
+          border: 'none', boxShadow: '0 4px 10px rgba(0,0,0,0.2)', cursor: 'pointer', zIndex: 1000,
+          transition: '0.3s',
+          transform: hoveredBtn === 'newInvoice' ? 'scale(1.05)' : 'scale(1)',
+        }}
+        onMouseEnter={() => setHoveredBtn('newInvoice')}
+        onMouseLeave={() => setHoveredBtn(null)}
+        onClick={() => navigate('/Invoice')}
+      >
+        {t('invoiceList.newInvoice')}
+      </button>
     </div>
   );
 }

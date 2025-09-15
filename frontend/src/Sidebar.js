@@ -34,11 +34,14 @@ function Sidebar() {
 
   const isRTL = i18n.language === 'ar';
 
-  // Hover effects
+  // تأثير Hover/Click على الروابط
   const handleLinkHover = (e) => e.currentTarget.style.transform = 'scale(1.02)';
   const handleLinkLeave = (e) => e.currentTarget.style.transform = 'scale(1)';
+
+  // تأثير Hover/Click على الأزرار
   const handleBtnHover = (e) => e.currentTarget.style.transform = 'scale(1.05)';
   const handleBtnLeave = (e) => e.currentTarget.style.transform = 'scale(1)';
+
   const handleBtnDown = (e) => e.currentTarget.style.transform = 'scale(0.97)';
   const handleBtnUp = (e) => e.currentTarget.style.transform = 'scale(1.05)';
 
@@ -47,7 +50,7 @@ function Sidebar() {
       {/* زر فتح السايدبار */}
       <button
         onClick={() => setOpen(!open)}
-        style={toggleButtonStyle(isRTL)}
+        style={toggleButtonStyle}
       >
         <FiMenu size={22} />
       </button>
@@ -55,12 +58,10 @@ function Sidebar() {
       {/* السايدبار */}
       <div style={{
         ...sidebarStyle,
-        right: isRTL ? (open ? '0' : '-270px') : 'auto',
-        left: !isRTL ? (open ? '0' : '-270px') : 'auto',
-        boxShadow: open 
-          ? (isRTL ? '-5px 0 20px rgba(0,0,0,0.5)' : '5px 0 20px rgba(0,0,0,0.5)') 
-          : 'none',
-        transition: 'left 0.3s ease, right 0.3s ease',
+        right: open ? '0' : '-270px',
+        boxShadow: open ? '-5px 0 20px rgba(0,0,0,0.5)' : 'none',
+        transform: open ? 'translateX(0)' : 'translateX(20px)',
+        transition: 'right 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease',
         direction: isRTL ? 'rtl' : 'ltr'
       }}>
         <div style={headerStyle}>
@@ -189,11 +190,10 @@ function Sidebar() {
 
 // ---------------------------- Styles ----------------------------
 
-const toggleButtonStyle = (isRTL) => ({
+const toggleButtonStyle = {
   position: 'fixed',
   top: '20px',
-  right: isRTL ? '20px' : 'auto',
-  left: !isRTL ? '20px' : 'auto',
+  right: '20px',
   zIndex: 1001,
   background: '#007bff',
   color: 'white',
@@ -203,12 +203,12 @@ const toggleButtonStyle = (isRTL) => ({
   cursor: 'pointer',
   boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
   transition: '0.2s'
-});
+};
 
 const sidebarStyle = {
   position: 'fixed',
   top: 0,
-  bottom: 0,
+  right: 0,
   width: '250px',
   height: '100%',
   background: 'linear-gradient(to bottom, #343a40, #212529)',

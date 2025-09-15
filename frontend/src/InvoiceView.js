@@ -81,8 +81,9 @@ const handleExportPDF = async () => {
   const drawHeader = () => {
     doc.setFont("Amiri", "normal");
     doc.setFontSize(28);
+    doc.setFont(undefined, 'bold')
     drawText(pageLang === 'ar' ? "فاتورة" : "INVOICE", pageWidth - margin, 25, { align: "right" });
-    if (logoImg) doc.addImage(logoImg, "JPEG", margin, 10, 40, 30);
+    if (logoImg) doc.addImage(logoImg, "JPEG", margin, 10, 40, 20);
   };
 
   // 🟢 الفوتر
@@ -104,7 +105,7 @@ const handleExportPDF = async () => {
     drawText("+249911451467", pageWidth - margin, footerY + 6, { align: alignCompanyInfo });
     drawText("support@kian24.com", pageWidth - margin, footerY + 12, { align: alignCompanyInfo });
     drawText("www.kian24.com", pageWidth - margin, footerY + 18, { align: alignCompanyInfo });
-    drawText(pageLang === 'ar' ? "بورتسودان | حي الأغاريق | الشركة السودانية" : "Port Sudan | Al-Aghariq District | South Sudan Company", pageWidth - margin, footerY + 24, { align: alignCompanyInfo });
+    drawText(pageLang === 'ar' ? "بورتسودان | حي الأغاريق | جنوب شركة سوداني " : "Port Sudan | Al-Aghariq District | South Sudani Company", pageWidth - margin, footerY + 24, { align: alignCompanyInfo });
 
     doc.setFontSize(14);
     drawText(pageLang === 'ar' ? "شكراً لكم" : "Thank You", pageWidth / 2, footerY + 40, { align: "center" });
@@ -113,40 +114,64 @@ const handleExportPDF = async () => {
   // 🟢 الهيدر
   drawHeader();
 
-  // بيانات العميل
-  doc.setFontSize(12);
-  drawText(`${pageLang === 'ar' ? "العميل" : "Client"}: ${clientName}`, margin, 45, { align: "left" });
+// بيانات العميل وبيانات الفاتورة مع تبديل المواقع للغة العربية
+doc.setFontSize(12);
+
+if (pageLang === "ar") {
+  // عربي → تبديل الأماكن
+  drawText(`${invoice.invoiceNumber || "---"} : رقم الفاتورة`, margin, 45, { align: "left" });
+  drawText(`${formatDate(invoice.created_at || invoice.date)}`, margin, 51, { align: "left" });
+
+  drawText(`${t("client")}: ${clientName}`, pageWidth - margin, 45, { align: "right" });
+  if (invoice.clientPhone) drawText(`${invoice.clientPhone}`, pageWidth - margin, 51, { align: "right" });
+  if (invoice.clientAddress) drawText(`${invoice.clientAddress}`, pageWidth - margin, 57, { align: "right" });
+} else {
+  // إنجليزي → الوضع الطبيعي
+  drawText(`${t("client")}: ${clientName}`, margin, 45, { align: "left" });
   if (invoice.clientPhone) drawText(`${invoice.clientPhone}`, margin, 51, { align: "left" });
   if (invoice.clientAddress) drawText(`${invoice.clientAddress}`, margin, 57, { align: "left" });
 
-  // بيانات الفاتورة
-  drawText(`${pageLang === 'ar' ? "رقم الفاتورة" : "Invoice No."}: ${invoice.invoiceNumber || "---"}`, pageWidth - margin, 45, { align: "right" });
+  drawText(`Invoice No: ${invoice.invoiceNumber || "---"}`, pageWidth - margin, 45, { align: "right" });
   drawText(`${formatDate(invoice.created_at || invoice.date)}`, pageWidth - margin, 51, { align: "right" });
+}
+
 
   // 🟢 جدول العناصر
-  const tableColumns = pageLang === 'ar' ? ["الصنف", "الكمية", "سعر الوحدة", "الإجمالي"] : ["Item", "Quantity", "Unit Price", "Total"];
-  const tableRows =
-    invoiceItems.length > 0
-      ? invoiceItems.map((i) => [
-          i.name || i.service || "",
-          i.quantity,
-          `${i.price.toLocaleString()} $`,
-          `${(i.price * i.quantity).toLocaleString()} $`,
-        ])
-      : [[pageLang === 'ar' ? "لا يوجد أصناف" : "No items", "", "", ""]];
+ const tableColumns = pageLang === 'ar' 
+  ? ["الإجمالي", "سعر الوحدة", "الكمية", "الصنف"] 
+  : ["Item", "Quantity", "Unit Price", "Total"];
 
-  doc.autoTable({
-    startY: 70,
-    head: [tableColumns],
-    body: tableRows,
-    theme: "grid",
-    headStyles: {
-      fillColor: [220, 220, 220],
-      textColor: [0, 0, 0],
-      halign: "center",
-      fontStyle: "bold",
-    },
-    bodyStyles: { halign: "center" },
+ const tableRows =
+  invoiceItems.length > 0
+    ? invoiceItems.map((i) =>
+        pageLang === 'ar'
+          ? [
+              `${(i.price * i.quantity).toLocaleString()} $`,
+              `${i.price.toLocaleString()} $`,
+              i.quantity,
+              i.name || i.service || "",
+            ]
+          : [
+              i.name || i.service || "",
+              i.quantity,
+              `${i.price.toLocaleString()} $`,
+              `${(i.price * i.quantity).toLocaleString()} $`,
+            ]
+      )
+    : [[pageLang === 'ar' ? "لا يوجد أصناف" : "No items", "", "", ""]];
+
+doc.autoTable({
+  startY: 70,
+  head: [tableColumns],
+  body: tableRows,
+  theme: "grid",
+  headStyles: {
+    fillColor: [220, 220, 220],
+    textColor: [0, 0, 0],
+    halign: "center",
+    fontStyle: "bold",
+  },
+   bodyStyles: { halign: "center" },
     styles: { fontSize: 11, font: "Amiri" },
     margin: { top: 70, bottom: 60 },
     didDrawPage: (data) => {
@@ -155,7 +180,7 @@ const handleExportPDF = async () => {
         drawFooter();
       }
     },
-  });
+});
 
   // 🟢 جدول الإجمالي
   let finalY = doc.lastAutoTable.finalY + 10;
@@ -169,21 +194,28 @@ const handleExportPDF = async () => {
     finalY = startYNewPage; // أقل مسافة من الهيدر للجدول الجديد
   }
 
-  doc.autoTable({
-    startY: finalY,
-    theme: "grid",
-    body: [
-      [pageLang === 'ar' ? "الإجمالي الفرعي" : "Subtotal", `${totalAmount.toLocaleString("en-US")} $`],
-      [pageLang === 'ar' ? "الضريبة (0%)" : "Tax (0%)", "0 $"],
-      [pageLang === 'ar' ? "الإجمالي" : "Total", `${totalAmount.toLocaleString("en-US")} $`],
-    ],
-    columnStyles: {
-      0: { halign: "left", cellWidth: 60 },
-      1: { halign: "right", cellWidth: 40, fontStyle: "bold" },
-    },
-    styles: { fontSize: 12, font: "Amiri" },
-    margin: { left: pageWidth - 110 },
-  });
+doc.autoTable({
+  startY: finalY,
+  theme: "grid",
+  body: pageLang === "ar"
+    ? [
+        [`${totalAmount.toLocaleString("en-US")} $`, "الإجمالي الفرعي"],
+        ["0 $", "الضريبة (0%)"],
+        [`${totalAmount.toLocaleString("en-US")} $`, "الإجمالي"],
+      ]
+    : [
+        ["Subtotal", `${totalAmount.toLocaleString("en-US")} $`],
+        ["Tax (0%)", "0 $"],
+        ["Total", `${totalAmount.toLocaleString("en-US")} $`],
+      ],
+  columnStyles: {
+    0: { halign: pageLang === "ar" ? "right" : "left", cellWidth: 60 },
+    1: { halign: pageLang === "ar" ? "left" : "right", cellWidth: 40, fontStyle: "bold" },
+  },
+  styles: { fontSize: 12, font: "Amiri" },
+  margin: { left: pageWidth - 110 },
+});
+
 
   doc.save(`Invoice-${invoice.invoiceNumber}.pdf`);
 };
