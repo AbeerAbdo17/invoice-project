@@ -81,23 +81,24 @@ const isRTL = pageLang === 'ar';
     };
 
     // 🟢 الفوتر
-    const drawFooter = () => {
+    const drawFooter = (pageNumber, totalPages) => {
       const footerY = pageHeight - 50;
       doc.setFontSize(12);
 
-      // معلومات الدفع
-drawText(isRTL ? 'معلومات الدفع' : 'PAYMENT INFORMATION', margin, footerY);
-drawText(`${isRTL ? 'البنك' : 'Bank'}: ${invoice.bankName || (isRTL ? 'بنك الخرطوم' : 'Bank of Khartoum')}`, margin, footerY + 6);
-drawText(`${isRTL ? 'اسم الحساب' : 'Account Name'}: ${invoice.accountName || (isRTL ? 'كيان' : 'kian')}`, margin, footerY + 12);
-drawText(`${isRTL ? 'رقم الحساب' : 'Account No'}: ${invoice.accountNumber || (isRTL ? '١٦١٧١٨' : '151617')}`, margin, footerY + 18);
+    // معلومات الدفع
+    drawText(isRTL ? 'معلومات الدفع' : 'PAYMENT INFORMATION', margin, footerY);
+    drawText(`${isRTL ? 'البنك' : 'Bank'}: ${invoice.bankName || (isRTL ? 'بنك الخرطوم' : 'Bank of Khartoum')}`, margin, footerY + 6);
+    drawText(`${isRTL ? 'اسم الحساب' : 'Account Name'}: ${invoice.accountName || (isRTL ? 'كيان' : 'kian')}`, margin, footerY + 12);
+    drawText(`${isRTL ? 'رقم الحساب' : 'Account No'}: ${invoice.accountNumber || (isRTL ? '١٦١٧١٨' : '151617')}`, margin, footerY + 18);
 
-// معلومات الشركة
-drawText(isRTL ? 'معلومات الشركة' : 'COMPANY INFORMATION', pageWidth - margin, footerY, { align: 'right' });
-drawText('+249911451467', pageWidth - margin, footerY + 6, { align: 'right' });
-drawText('support@kian24.com', pageWidth - margin, footerY + 12, { align: 'right' });
-drawText('www.kian24.com', pageWidth - margin, footerY + 18, { align: 'right' });
-drawText(isRTL ? 'بورتسودان | حي الأغاريق | جنوب شركة سوداني ' : 'Port Sudan | Al-Aghariq District | South Sudani Company', pageWidth - margin, footerY + 24, { align: 'right' });
+    // معلومات الشركة
+    drawText(isRTL ? 'معلومات الشركة' : 'COMPANY INFORMATION', pageWidth - margin, footerY, { align: 'right' });
+    drawText('+249911451467', pageWidth - margin, footerY + 6, { align: 'right' });
+    drawText('support@kian24.com', pageWidth - margin, footerY + 12, { align: 'right' });
+    drawText('www.kian24.com', pageWidth - margin, footerY + 18, { align: 'right' });
+    drawText(isRTL ? 'بورتسودان | حي الأغاريق | جنوب شركة سوداني ' : 'Port Sudan | Al-Aghariq District | South Sudani Company', pageWidth - margin, footerY + 24, { align: 'right' });
 
+    
 
       doc.setFontSize(14);
       drawText(i18n.language === 'ar' ? 'شكراً لكم' : 'Thank You', pageWidth / 2, footerY + 40, { align: 'center' });
@@ -168,7 +169,10 @@ const tableRows =
       didDrawPage: (data) => {
         drawHeader();
         if (data.pageNumber === doc.internal.getNumberOfPages()) {
-          drawFooter();
+          doc.setFontSize(10);
+          const pageNumber = data.pageNumber;
+    drawText(pageNumber.toString(), margin, pageHeight - 10, { align: 'left' }); 
+            drawFooter(pageNumber, 0);
         }
       },
     });

@@ -100,7 +100,7 @@ const drawText = (text, x, y, options = {}) => {
       if (logoImg) doc.addImage(logoImg, 'JPEG', margin, 10, 40, 20);
     };
 
-    const drawFooter = () => {
+    const drawFooter = (pageNumber, totalPages) => {
       const footerY = pageHeight - 50;
       doc.setFontSize(12);
       drawText(i18n.language === 'ar' ? 'معلومات الدفع' : 'PAYMENT INFORMATION', margin, footerY);
@@ -113,6 +113,8 @@ const drawText = (text, x, y, options = {}) => {
       drawText('support@kian24.com', pageWidth - margin, footerY + 12, { align: 'right' });
       drawText('www.kian24.com', pageWidth - margin, footerY + 18, { align: 'right' });
       drawText(i18n.language === 'ar' ? 'بورتسودان | حي الأغاريق | جنوب شركة سوداني ' : 'Port Sudan | Al-Aghariq District | South Sudani Company', pageWidth - margin, footerY + 24, { align: 'right' });
+
+ 
 
       doc.setFontSize(14);
       drawText(i18n.language === 'ar' ? 'شكراً لكم' : 'Thank You', pageWidth / 2, footerY + 40, { align: 'center' });
@@ -176,7 +178,13 @@ const tableRows =
       margin: { top: 70, bottom: 60 },
       didDrawPage: (data) => {
         drawHeader();
-        if (data.pageNumber === doc.internal.getNumberOfPages()) drawFooter();
+        if (data.pageNumber === doc.internal.getNumberOfPages()){
+          doc.setFontSize(10);
+          const pageNumber = data.pageNumber;
+    drawText(pageNumber.toString(), margin, pageHeight - 10, { align: 'left' }); 
+            drawFooter(pageNumber, 0);
+          
+        }
       },
     });
 

@@ -87,7 +87,7 @@ const handleExportPDF = async () => {
   };
 
   // 🟢 الفوتر
-  const drawFooter = () => {
+  const drawFooter = (pageNumber, totalPages) => {
     const footerY = pageHeight - 50;
     doc.setFontSize(12);
 
@@ -106,6 +106,8 @@ const handleExportPDF = async () => {
     drawText("support@kian24.com", pageWidth - margin, footerY + 12, { align: alignCompanyInfo });
     drawText("www.kian24.com", pageWidth - margin, footerY + 18, { align: alignCompanyInfo });
     drawText(pageLang === 'ar' ? "بورتسودان | حي الأغاريق | جنوب شركة سوداني " : "Port Sudan | Al-Aghariq District | South Sudani Company", pageWidth - margin, footerY + 24, { align: alignCompanyInfo });
+
+    
 
     doc.setFontSize(14);
     drawText(pageLang === 'ar' ? "شكراً لكم" : "Thank You", pageWidth / 2, footerY + 40, { align: "center" });
@@ -177,7 +179,10 @@ doc.autoTable({
     didDrawPage: (data) => {
       drawHeader();
       if (data.pageNumber === doc.internal.getNumberOfPages()) {
-        drawFooter();
+        doc.setFontSize(10);
+        const pageNumber = data.pageNumber;
+    drawText(pageNumber.toString(), margin, pageHeight - 10, { align: 'left' }); 
+            drawFooter(pageNumber, 0);
       }
     },
 });
