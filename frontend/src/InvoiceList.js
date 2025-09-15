@@ -135,7 +135,7 @@ if (i18n.language === 'ar') {
   if (invoice.clientPhone) drawText(`${invoice.clientPhone}`, margin, 51, { align: 'left' });
   if (invoice.clientAddress) drawText(`${invoice.clientAddress}`, margin, 57, { align: 'left' });
 
-  drawText(`Invoice No.: ${invoice.invoiceNumber || '---'}`, pageWidth - margin, 45, { align: 'right' });
+  drawText(`Invoice No: ${invoice.invoiceNumber || '---'}`, pageWidth - margin, 45, { align: 'right' });
   drawText(`${formatDate(invoice.created_at || invoice.date)}`, pageWidth - margin, 51, { align: 'right' });
 }
 

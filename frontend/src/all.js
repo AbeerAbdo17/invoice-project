@@ -36,6 +36,8 @@ function AllInvoicesPage() {
   const handleExportPDF = async (invoice) => {
     if (!invoice) return;
 
+    const pageLang = i18n.language;  // 'ar' أو 'en'
+const isRTL = pageLang === 'ar';
     const doc = new jsPDF("p", "mm", "a4");
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -84,17 +86,18 @@ function AllInvoicesPage() {
       doc.setFontSize(12);
 
       // معلومات الدفع
-      drawText(t("paymentInfo"), margin, footerY);
-      drawText(`${t("bank")}: ${invoice.bankName || (i18n.language === "ar" ? "بنك الخرطوم" : "Bank of Khartoum")}`, margin, footerY + 6);
-      drawText(`${t("accountName")}: ${invoice.accountName || (i18n.language === "ar" ? "كيان" : "kian")}`, margin, footerY + 12);
-      drawText(`${t("accountNumber")}: ${invoice.accountNumber || (i18n.language === "ar" ? "١٦١٧١٨" : "151617")}`, margin, footerY + 18);
+drawText(isRTL ? 'معلومات الدفع' : 'PAYMENT INFORMATION', margin, footerY);
+drawText(`${isRTL ? 'البنك' : 'Bank'}: ${invoice.bankName || (isRTL ? 'بنك الخرطوم' : 'Bank of Khartoum')}`, margin, footerY + 6);
+drawText(`${isRTL ? 'اسم الحساب' : 'Account Name'}: ${invoice.accountName || (isRTL ? 'كيان' : 'kian')}`, margin, footerY + 12);
+drawText(`${isRTL ? 'رقم الحساب' : 'Account No'}: ${invoice.accountNumber || (isRTL ? '١٦١٧١٨' : '151617')}`, margin, footerY + 18);
 
-      // معلومات الشركة
-      drawText(t("companyInfo"), pageWidth - margin, footerY, { align: "right" });
-      drawText("+249911451467", pageWidth - margin, footerY + 6, { align: "right" });
-      drawText("support@kian24.com", pageWidth - margin, footerY + 12, { align: "right" });
-      drawText("www.kian24.com", pageWidth - margin, footerY + 18, { align: "right" });
-      drawText(i18n.language === "ar" ? "بورتسودان | حي الأغاريق | جنوب شركة سوداني " : "Port Sudan | Al-Aghariq District | South Sudani Company", pageWidth - margin, footerY + 24, { align: "right" });
+// معلومات الشركة
+drawText(isRTL ? 'معلومات الشركة' : 'COMPANY INFORMATION', pageWidth - margin, footerY, { align: 'right' });
+drawText('+249911451467', pageWidth - margin, footerY + 6, { align: 'right' });
+drawText('support@kian24.com', pageWidth - margin, footerY + 12, { align: 'right' });
+drawText('www.kian24.com', pageWidth - margin, footerY + 18, { align: 'right' });
+drawText(isRTL ? 'بورتسودان | حي الأغاريق | جنوب شركة سوداني ' : 'Port Sudan | Al-Aghariq District | South Sudani Company', pageWidth - margin, footerY + 24, { align: 'right' });
+
 
       doc.setFontSize(14);
       drawText(i18n.language === 'ar' ? 'شكراً لكم' : 'Thank You', pageWidth / 2, footerY + 40, { align: 'center' });
@@ -119,7 +122,7 @@ if (i18n.language === "ar") {
   if (invoice.clientPhone) drawText(`${invoice.clientPhone}`, margin, 51, { align: "left" });
   if (invoice.clientAddress) drawText(`${invoice.clientAddress}`, margin, 57, { align: "left" });
 
-  drawText(`Invoice No.: ${invoice.invoiceNumber || "---"}`, pageWidth - margin, 45, { align: "right" });
+  drawText(`Invoice No: ${invoice.invoiceNumber || "---"}`, pageWidth - margin, 45, { align: "right" });
   drawText(`${formatDate(invoice.created_at || invoice.date)}`, pageWidth - margin, 51, { align: "right" });
 }
 
